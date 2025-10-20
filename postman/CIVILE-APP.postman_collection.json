@@ -1,0 +1,142 @@
+{
+  "info": {
+    "name": "CIVILE-APP API",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register (Parent)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth","register"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"parent{{timestamp}}@mail.com\",\n  \"password\": \"pass12345\",\n  \"name\": \"Parent Test\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Login (Parent/Mairie/Hopital)",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "application/json" } ],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth","login"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"agent@mairie.gouv.sn\",\n  \"password\": \"admin12345\"\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json.token) { pm.environment.set('token', json.token); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Parent",
+      "item": [
+        {
+          "name": "Create Declaration",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/declarations", "host": ["{{baseUrl}}"], "path": ["declarations"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"child\": {\n    \"firstName\": \"Awa\",\n    \"lastName\": \"NDIAYE\",\n    \"birthDate\": \"2024-12-12\",\n    \"sex\": \"F\",\n    \"birthPlace\": \"Dakar\"\n  },\n  \"mother\": {\n    \"firstName\": \"Mariam\",\n    \"lastName\": \"Ndiaye\",\n    \"cniNumber\": \"CNI123\",\n    \"profession\": \"Commerçante\"\n  },\n  \"father\": {\n    \"firstName\": \"Ibrahima\",\n    \"lastName\": \"Ndiaye\",\n    \"cniNumber\": \"CNI456\",\n    \"profession\": \"Chauffeur\"\n  },\n  \"documents\": {\n    \"certificatePhotoUrl\": \"https://example.com/cert.jpg\",\n    \"certificateNumber\": \"CERT-001\",\n    \"hospitalName\": \"Hôpital Principal\"\n  }\n}"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "if (json._id) { pm.environment.set('parentDeclarationId', json._id); }"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pay Stamp (Wave)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/declarations/{{parentDeclarationId}}/pay", "host": ["{{baseUrl}}"], "path": ["declarations","{{parentDeclarationId}}","pay"] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"provider\": \"wave\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Get Extract (HTML)",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ],
+            "url": { "raw": "{{baseUrl}}/declarations/{{parentDeclarationId}}/extract", "host": ["{{baseUrl}}"], "path": ["declarations","{{parentDeclarationId}}","extract"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mairie",
+      "item": [
+        {
+          "name": "List & Stats",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/mairie", "host": ["{{baseUrl}}"], "path": ["mairie"] } }
+        },
+        {
+          "name": "Send To Hospital",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/mairie/{{parentDeclarationId}}/send-to-hospital", "host": ["{{baseUrl}}"], "path": ["mairie","{{parentDeclarationId}}","send-to-hospital"] } }
+        },
+        {
+          "name": "Validate",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/mairie/{{parentDeclarationId}}/validate", "host": ["{{baseUrl}}"], "path": ["mairie","{{parentDeclarationId}}","validate"] } }
+        },
+        {
+          "name": "Reject",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/mairie/{{parentDeclarationId}}/reject", "host": ["{{baseUrl}}"], "path": ["mairie","{{parentDeclarationId}}","reject"] }, "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Dossier incomplet\"\n}" } }
+        }
+      ]
+    },
+    {
+      "name": "Hopital",
+      "item": [
+        {
+          "name": "List to Verify",
+          "request": { "method": "GET", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/hopital", "host": ["{{baseUrl}}"], "path": ["hopital"] } }
+        },
+        {
+          "name": "Confirm",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/hopital/{{parentDeclarationId}}/confirm", "host": ["{{baseUrl}}"], "path": ["hopital","{{parentDeclarationId}}","confirm"] } }
+        },
+        {
+          "name": "Reject",
+          "request": { "method": "POST", "header": [ { "key": "Authorization", "value": "Bearer {{token}}" } ], "url": { "raw": "{{baseUrl}}/hopital/{{parentDeclarationId}}/reject", "host": ["{{baseUrl}}"], "path": ["hopital","{{parentDeclarationId}}","reject"] } }
+        }
+      ]
+    }
+  ]
+}
