@@ -25,8 +25,14 @@ async function main() {
     cors({
       origin: env.corsOrigin,
       credentials: true,
+      allowedHeaders: ['Content-Type', 'Authorization'],
+      methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      exposedHeaders: ['Content-Disposition']
     })
   );
+  
+  // Gestion des requêtes OPTIONS pour CORS
+  app.options('*', cors());
   app.use(express.json({ limit: '5mb' }));
   app.use(morgan('dev'));
 
@@ -50,11 +56,11 @@ async function main() {
     });
   });
 
-  // Routes API
-  app.use('/auth', authRoutes);
-  app.use('/declarations', declarationRoutes);
-  app.use('/mairie', mairieRoutes);
-  app.use('/hopital', hospitalRoutes);
+  // Routes
+  app.use('/api/auth', authRoutes);
+  app.use('/api/declarations', declarationRoutes);
+  app.use('/api/mairie', mairieRoutes);
+  app.use('/api/hopital', hospitalRoutes);
 
   // Swagger UI (OpenAPI)
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));

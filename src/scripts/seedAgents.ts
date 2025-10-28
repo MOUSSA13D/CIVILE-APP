@@ -14,8 +14,24 @@ async function run() {
   const passwordHash = await hashPassword(password);
 
   const agents = [
-    { email: 'agent@mairie.gouv.sn', role: 'mairie' as const, name: 'Agent Mairie' },
-    { email: 'agent@hopital.gouv.sn', role: 'hopital' as const, name: 'Agent Hopital' },
+    { 
+      email: 'agent@mairie.gouv.sn', 
+      role: 'mairie' as const, 
+      name: 'Agent Mairie',
+      firstName: 'Agent',
+      lastName: 'Mairie',
+      phone: '+221771111111',
+      address: 'Mairie de Dakar'
+    },
+    { 
+      email: 'agent@hopital.gouv.sn', 
+      role: 'hopital' as const, 
+      name: 'Agent Hopital',
+      firstName: 'Agent',
+      lastName: 'Hopital',
+      phone: '+221772222222',
+      address: 'Hôpital Principal de Dakar'
+    },
   ];
 
   for (const a of agents) {
@@ -23,10 +39,25 @@ async function run() {
     if (existing) {
       existing.role = a.role as any;
       if (!existing.passwordHash) existing.passwordHash = passwordHash;
+      if (!existing.firstName) existing.firstName = a.firstName;
+      if (!existing.lastName) existing.lastName = a.lastName;
+      if (!existing.phone) existing.phone = a.phone;
+      if (!existing.address) existing.address = a.address;
+      existing.isVerified = true;  // Les agents sont automatiquement vérifiés
       await existing.save();
       console.log(`Updated: ${a.email}`);
     } else {
-      await User.create({ email: a.email, role: a.role as any, name: a.name, passwordHash });
+      await User.create({ 
+        email: a.email, 
+        role: a.role as any, 
+        name: a.name, 
+        firstName: a.firstName,
+        lastName: a.lastName,
+        phone: a.phone,
+        address: a.address,
+        passwordHash,
+        isVerified: true  // Les agents sont automatiquement vérifiés
+      });
       console.log(`Created: ${a.email}`);
     }
   }

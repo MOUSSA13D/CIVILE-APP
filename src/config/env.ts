@@ -1,7 +1,6 @@
 import dotenv from 'dotenv';
 import path from 'path';
 
-// Détecte le fichier d'environnement selon NODE_ENV
 const envFile =
   process.env.NODE_ENV === 'production'
     ? path.resolve(process.cwd(), '.env.production')
@@ -14,12 +13,17 @@ export const env = {
   port: Number(process.env.PORT || 4000),
   mongoUri: process.env.MONGODB_URI || '',
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
-  corsOrigin: process.env.CORS_ORIGIN || '*',
+  corsOrigin: process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map((url) => url.trim())
+    : ['http://localhost:3000', 'http://localhost:4000'],
   backendUrl:
     process.env.BACKEND_URL ||
-    `http://localhost:${process.env.PORT || 4000}`, // pour Swagger et autres usages
+    `http://localhost:${process.env.PORT || 4000}`,
 };
 
 if (!env.mongoUri) {
-  console.warn('[env] MONGODB_URI n’est pas défini !');
+  console.warn('[env] ⚠️ MONGODB_URI n’est pas défini !');
 }
+
+console.log('[CORS] Origines autorisées :', env.corsOrigin);
+

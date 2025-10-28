@@ -1,15 +1,38 @@
 import dayjs from 'dayjs';
 import { STAMP_AMOUNT_FCFA } from '../config/constants.js';
 
+interface Person {
+  firstName?: string;
+  lastName?: string;
+  birthDate?: Date;
+  birthPlace?: string;
+  sex?: 'M' | 'F';
+  [key: string]: any; // Pour les propriétés supplémentaires
+}
+
 export function generateExtractHTML(data: {
-  child: { firstName: string; lastName: string; birthDate: Date; sex: 'M' | 'F'; birthPlace: string };
-  mother: { firstName?: string; lastName?: string };
-  father: { firstName?: string; lastName?: string };
+  child: Person;
+  mother: Person;
+  father: Person;
   declarationId: string;
   paidAt: Date;
 }): string {
-  const dateStr = dayjs(data.child.birthDate).format('DD/MM/YYYY');
-  const paidStr = dayjs(data.paidAt).format('DD/MM/YYYY HH:mm');
+  // Fonction utilitaire pour formater les noms en toute sécurité
+  const formatName = (person: Person) => {
+    if (!person) return 'Non spécifié';
+    const lastName = person.lastName ? person.lastName.toUpperCase() : '';
+    const firstName = person.firstName || '';
+    return `${lastName} ${firstName}`.trim() || 'Non spécifié';
+  };
+
+  // Formater les dates avec gestion des valeurs manquantes
+  const formatDate = (date?: Date) => {
+    return date ? dayjs(date).format('DD/MM/YYYY') : 'Date non spécifiée';
+  };
+
+  const dateStr = data.child?.birthDate ? formatDate(data.child.birthDate) : 'Date de naissance inconnue';
+  const paidStr = data.paidAt ? dayjs(data.paidAt).format('DD/MM/YYYY HH:mm') : 'Date de paiement inconnue';
+  const birthPlace = data.child?.birthPlace || 'Lieu de naissance non spécifié';
   return `<!doctype html>
 <html lang="fr">
 <head>
@@ -32,14 +55,14 @@ export function generateExtractHTML(data: {
   </div>
 
   <div class="section">
-    <div><span class="label">Enfant:</span> ${data.child.lastName.toUpperCase()} ${data.child.firstName}</div>
-    <div><span class="label">Né(e) le:</span> ${dateStr} à ${data.child.birthPlace}</div>
-    <div><span class="label">Sexe:</span> ${data.child.sex}</div>
+    <div><span class="label">Enfant:</span> ${formatName(data.child)}</div>
+    <div><span class="label">Né(e) le:</span> ${dateStr} à ${birthPlace}</div>
+    <div><span class="label">Sexe:</span> ${data.child?.sex || 'Non spécifié'}</div>
   </div>
 
   <div class="section">
-    <div><span class="label">Mère:</span> ${(data.mother.lastName || '').toUpperCase()} ${data.mother.firstName || ''}</div>
-    <div><span class="label">Père:</span> ${(data.father.lastName || '').toUpperCase()} ${data.father.firstName || ''}</div>
+    <div><span class="label">Mère:</span> ${formatName(data.mother)}</div>
+    <div><span class="label">Père:</span> ${formatName(data.father)}</div>
   </div>
 
   <div class="section">
