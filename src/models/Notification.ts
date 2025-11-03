@@ -9,6 +9,7 @@ export interface INotification extends Document {
   readAt?: Date;
   createdAt: Date;
   updatedAt: Date;
+  __v?: number; // Rendre __v optionnel
 }
 
 const NotificationSchema = new Schema<INotification>(
@@ -52,7 +53,9 @@ const NotificationSchema = new Schema<INotification>(
       transform: function(doc, ret) {
         ret.id = ret._id;
         delete ret._id;
-        delete ret.__v;
+        if ('__v' in ret) {
+          delete ret.__v;
+        }
         return ret;
       }
     }

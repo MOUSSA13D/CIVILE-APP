@@ -23,6 +23,7 @@ const UserSchema = new Schema(
 );
 
 export interface IUser extends Document {
+  [key: string]: any;  // Signature d'index
   _id: any;
   email: string;
   passwordHash: string;

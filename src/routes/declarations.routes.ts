@@ -401,13 +401,17 @@ router.post('/',
       console.error('Erreur lors de la création de la déclaration:', error);
       
       // En cas d'erreur, supprimer les fichiers téléchargés
-      const uploadedFiles = [
-        certificatNaissance,
-        pieceIdentitePere,
-        pieceIdentiteMere,
-        livretFamille,
-        justificatifDomicile
-      ].filter(Boolean) as string[];
+      const uploadedFiles: string[] = [];
+      
+      // Utiliser req.files qui a été typé plus haut
+      const files = req.files as { [fieldname: string]: Express.Multer.File[] };
+      
+      // Ajouter les chemins des fichiers s'ils existent
+      if (files?.certificatNaissance?.[0]?.path) uploadedFiles.push(files.certificatNaissance[0].path);
+      if (files?.pieceIdentitePere?.[0]?.path) uploadedFiles.push(files.pieceIdentitePere[0].path);
+      if (files?.pieceIdentiteMere?.[0]?.path) uploadedFiles.push(files.pieceIdentiteMere[0].path);
+      if (files?.livretFamille?.[0]?.path) uploadedFiles.push(files.livretFamille[0].path);
+      if (files?.justificatifDomicile?.[0]?.path) uploadedFiles.push(files.justificatifDomicile[0].path);
 
       uploadedFiles.forEach(filePath => {
         try {

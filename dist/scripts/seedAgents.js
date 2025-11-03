@@ -11,8 +11,24 @@ async function run() {
     const password = 'admin12345';
     const passwordHash = await hashPassword(password);
     const agents = [
-        { email: 'agent@mairie.gouv.sn', role: 'mairie', name: 'Agent Mairie' },
-        { email: 'agent@hopital.gouv.sn', role: 'hopital', name: 'Agent Hopital' },
+        {
+            email: 'agent@mairie.gouv.sn',
+            role: 'mairie',
+            name: 'Agent Mairie',
+            firstName: 'Agent',
+            lastName: 'Mairie',
+            phone: '+221771111111',
+            address: 'Mairie de Dakar'
+        },
+        {
+            email: 'agent@hopital.gouv.sn',
+            role: 'hopital',
+            name: 'Agent Hopital',
+            firstName: 'Agent',
+            lastName: 'Hopital',
+            phone: '+221772222222',
+            address: 'Hôpital Principal de Dakar'
+        },
     ];
     for (const a of agents) {
         const existing = await User.findOne({ email: a.email });
@@ -20,11 +36,30 @@ async function run() {
             existing.role = a.role;
             if (!existing.passwordHash)
                 existing.passwordHash = passwordHash;
+            if (!existing.firstName)
+                existing.firstName = a.firstName;
+            if (!existing.lastName)
+                existing.lastName = a.lastName;
+            if (!existing.phone)
+                existing.phone = a.phone;
+            if (!existing.address)
+                existing.address = a.address;
+            existing.isVerified = true; // Les agents sont automatiquement vérifiés
             await existing.save();
             console.log(`Updated: ${a.email}`);
         }
         else {
-            await User.create({ email: a.email, role: a.role, name: a.name, passwordHash });
+            await User.create({
+                email: a.email,
+                role: a.role,
+                name: a.name,
+                firstName: a.firstName,
+                lastName: a.lastName,
+                phone: a.phone,
+                address: a.address,
+                passwordHash,
+                isVerified: true // Les agents sont automatiquement vérifiés
+            });
             console.log(`Created: ${a.email}`);
         }
     }
@@ -37,3 +72,4 @@ run().catch((e) => {
     console.error(e);
     process.exit(1);
 });
+//# sourceMappingURL=seedAgents.js.map

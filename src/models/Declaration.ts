@@ -56,6 +56,7 @@ interface IExtractInfo {
 
 // Interface principale pour le modèle Declaration
 export interface IDeclaration extends Document {
+  [key: string]: any;  // Signature d'index pour permettre l'accès aux propriétés dynamiques
   parent: Types.ObjectId;
   child: IChildInfo;
   mother: IPersonInfo;

@@ -10,7 +10,7 @@ const router = Router();
 const validateDeclarationId = async (req: Request, res: Response, next: Function) => {
   const { id } = req.params;
   
-  if (!Types.ObjectId.isValid(id)) {
+  if (!id || typeof id !== 'string' || !Types.ObjectId.isValid(id)) {
     return res.status(400).json({ 
       success: false,
       message: 'ID de déclaration invalide',
@@ -109,7 +109,7 @@ router.post('/declarations/:id/verify',
       // Vérification des documents obligatoires
       const requiredDocs = ['certificat_naissance', 'piece_identite_pere', 'piece_identite_mere'];
       const missingDocs = requiredDocs.filter(doc => 
-        !declaration.documents?.some(d => d.includes(doc))
+        !declaration.documents?.some((d: string) => d.includes(doc))
       );
 
       if (missingDocs.length > 0) {
@@ -135,6 +135,13 @@ router.post('/declarations/:id/verify',
       }
 
       // Si la déclaration est valide
+      if (!req.user) {
+        return res.status(401).json({ 
+          success: false, 
+          message: 'Non autorisé - Utilisateur non authentifié' 
+        });
+      }
+      
       declaration.status = 'validated';
       declaration.verifiedBy = req.user.id;
       declaration.verifiedAt = new Date();

@@ -10,3 +10,4 @@ export async function processStampPayment(provider) {
         transactionId: `TX-${randomBytes(4).toString('hex')}`,
     };
 }
+//# sourceMappingURL=paymentMock.js.map
