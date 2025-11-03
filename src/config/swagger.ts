@@ -150,15 +150,35 @@ export const swaggerSpec = swaggerJSDoc(options);
 
 // Fonction pour configurer Swagger UI
 export function setupSwagger(app: Express): void {
+  // Configuration spécifique pour la production
+  const isProduction = process.env.NODE_ENV === 'production';
+  const swaggerPath = '/api-docs';
+  const swaggerUrl = isProduction 
+    ? `${env.backendUrl}${swaggerPath}`
+    : `http://localhost:${env.port}${swaggerPath}`;
+
+  // Configuration de Swagger UI
+  const swaggerOptions = {
+    explorer: true,
+    customCss: '.swagger-ui .topbar { display: none }',
+    customSiteTitle: 'CIVILE-APP API Documentation',
+    swaggerOptions: {
+      urls: [
+        {
+          url: isProduction 
+            ? `${env.backendUrl}/api-docs.json`
+            : '/api-docs.json',
+          name: 'API v1'
+        }
+      ]
+    }
+  };
+
   // Route pour la documentation Swagger UI
   app.use(
-    '/api-docs',
+    swaggerPath,
     swaggerUi.serve,
-    swaggerUi.setup(swaggerSpec, {
-      explorer: true,
-      customCss: '.swagger-ui .topbar { display: none }',
-      customSiteTitle: 'CIVILE-APP API Documentation',
-    })
+    swaggerUi.setup(swaggerSpec, swaggerOptions)
   );
 
   // Route pour le fichier JSON de la spécification
@@ -167,7 +187,7 @@ export function setupSwagger(app: Express): void {
     res.send(swaggerSpec);
   });
 
-  console.log('[Swagger] Documentation disponible à /api-docs');
+  console.log(`[Swagger] Documentation disponible à ${swaggerUrl}`);
 }
 
 // Export par défaut pour la rétrocompatibilité
